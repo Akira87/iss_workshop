@@ -1,0 +1,39 @@
+# Summary
+# Step 2 to 5 illustrate how an image is built
+# Step 6 to 8 illustrate how an image is provision/run
+
+# Difference between RUN, ENTRYPOINT and CMD
+# RUN is only called during build time
+# ENTRYPOINT is like a fixed command that can't be changed
+# CMD is like additional options to be run
+
+# 1. Set the dependencies or software required for the program
+FROM node:latest
+
+# 2. Set environment variables
+ENV APP_ROOT=/app
+ENV APP_PORT=3000
+
+# 3. Create the directory and cd into it
+WORKDIR ${APP_ROOT}
+
+# 4. Copy files in the image
+# Files will be copied into /app
+ADD main.js .
+ADD package.json .
+ADD public public
+ADD views views
+
+# 5. Run some commands
+RUN npm install
+
+# 6. Set what port our container will be exposing
+# Default is TCP
+EXPOSE ${APP_PORT}
+
+# 7. Add health check to the application
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD curl -f http://localhost:${APP_PORT}/health > /dev/null || exit 1
+    
+# 8. Set the entry point or the command to run
+ENTRYPOINT [ "node", "main.js" ]
