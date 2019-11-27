@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nwdb-deploy
+  namespace: nwapp
+  labels:
+    name: nwdb-deploy
+    version: v1
+
+spec:
+  # number of pods
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nwdb-pod
+      version: v1
+  template:
+    # pod template (describe the pod)
+    metadata:
+      name: nwdb-pod
+      labels:
+        name: nwdb-pod
+        version: v1
+    spec:
+      containers:
+        - name: northwind-container
+          image: akira87/mynorthwinddb:v1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: northwind-secret
+                  key: db_password
+          ports:
+            - name: mysql-port
+              containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: nwdb-svc
+  namespace: nwapp
+  labels:
+    name: nwdb-svc
+    version: v1
+
+spec:
+  type: ClusterIP
+  selector:
+    name: nwdb-pod
+    version: v1
+  ports:
+  - name: http
+    port: 3306
+    targetPort: mysql-port

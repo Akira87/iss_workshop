@@ -1,0 +1,34 @@
+---
+# Setting up of namespace
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: nwapp
+  labels:
+    version: v1
+---
+# Setting up of config map
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: northwind-config
+  namespace: nwapp
+
+data:
+  db_host: nwdb-svc.nwapp.svc.cluster.local
+  db_user: root
+  server_port: "3000"
+---
+# Setting up of secret
+apiVersion: v1
+kind: Secret
+
+metadata:
+  name: northwind-secret
+  namespace: nwapp
+
+data:
+  db_password: cGFzc3dvcmQ=
+---
