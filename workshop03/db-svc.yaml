@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: mydb-svc
+  labels:
+    name: mydb-svc
+    version: v1
+
+spec:
+  # This selector is to match that to the metadata label defined in the template pod in deployment
+  selector:
+    name: mysqldb
+    version: v1
+  type: ClusterIP
+  ports:
+  - name: mysqldb-svc-port
+    port: 3306
+    targetPort: mysqldb-port

@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: db-deployment
+  labels:
+    name: db-deployment
+    version: v1
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mysqldb
+      version: v1
+  template:
+    # Define the name and labels that defines the pod
+    metadata:
+      name: mysqldb
+      labels:
+        name: mysqldb
+        version: v1
+    # Define the actual pod which can contain few containers
+    spec:
+      # Map the name of the volume to be mounted to the persistent volume claim
+      volumes:
+        - name: mysqldb-volume
+          persistentVolumeClaim:
+            claimName: mysqldb-pvc
+      # Initialise the volume to be cleaned
+      initContainers:
+        - name: scrub
+          image: busybox
+          command: ["/bin/sh", "-c", "test -e /scrub && rm -rf /scrub/..?* /scrub/.[!.]* /scrub/*  && test -z \"$(ls -A /scrub)\" || exit 1"]
+          volumeMounts:
+            - mountPath: /scrub
+              name: mysqldb-volume
+      containers:
+      - name: mysqldb-container
+        image: stackupiss/northwind-db:v1
+        resources:
+          requests:
+            cpu: "20m"
+            memory: "55M"
+        env:
+        - name: MY_SQL_ROOT_PASSWORD
+          value: changeit
+        - name: MYSQL_DATABASE
+          value: northwind
+        ports:
+        - name: mysqldb-port
+          containerPort: 3306
+        # Map the desired internal memory to the name of the volume mentioned above
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mysqldb-volume
+        imagePullPolicy: IfNotPresent
+      restartPolicy: Always

@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: appv2-svc
+  labels:
+    name: appv2-svc
+    version: v2
+
+spec:
+  selector:
+    name: app-pod
+    version: v2
+  type: ClusterIP
+  ports:
+  - name: myappv2-port
+    port: 80
+    targetPort: app-port

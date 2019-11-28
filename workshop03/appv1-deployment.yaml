@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: appv1-deployment
+  labels:
+    name: app-deployment
+    version: v1
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: app-pod
+      version: v1
+  template:
+    metadata:
+      name: app-pod
+      labels:
+        name: app-pod
+        version: v1
+    spec:
+      containers:
+        - name: app-container
+          image: stackupiss/northwind-app:v1
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: app-port
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "55M"
+          env:
+          - name: DB_HOST
+            value: mydb-svc
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_USER
+            value: root
+          - name: DB_PASSWORD
+            value: changeit
+          ports:
+          - name: app-port
+            containerPort: 3000
