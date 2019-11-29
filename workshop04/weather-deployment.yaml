@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: weather-deployment
+  labels:
+    name: weather-deployment
+    version: v1
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: weather-pod
+      version: v1
+  template:
+    metadata:
+      name: weather-pod
+      labels:
+        name: weather-pod
+        version: v1
+    spec:
+      containers:
+        - name: weather-container
+          image: stackupiss/weather:v1
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: weather-port
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "55M"
+          env:
+          - name: APP_ID
+            value: "7a2e229d6b003e6feda882fb9a2861c0"
+          ports:
+          - name: weather-port
+            containerPort: 3000
